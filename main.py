@@ -8,7 +8,7 @@ import time
 
 # Configurar Selenium
 options = Options()
-# options.add_argument("--headless")  # Ejecutar en segundo plano (sin abrir ventana)
+options.add_argument("--headless")  # Ejecutar en segundo plano (sin abrir ventana)
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
 
@@ -41,6 +41,14 @@ for page in range(1, 3):
         rating_tag = card.find('div', attrs={'aria-label': 'calificación'})
         rating = rating_tag['aria-valuenow'] if rating_tag and rating_tag.has_attr('aria-valuenow') else "Sin rating"
 
+        body_content = card.find('div', class_='cds-CommonCard-bodyContent')
+        skills = "No encontrados"
+
+        if body_content:
+            skills_tag = body_content.find('p', class_='css-vac8rf')
+            if skills_tag:
+                skills = skills_tag.get_text(strip=True)
+        
         metadata_div = card.find('div', class_='cds-CommonCard-metadata')
         description_tag = metadata_div.find('p', class_='css-vac8rf') if metadata_div else None
         descripcion = description_tag.get_text(strip=True) if description_tag else ""
@@ -73,11 +81,13 @@ for page in range(1, 3):
                 estudiantes = f"Error: {str(e)}"
 
         print(f"Título: {titulo}")
-        print(f"Socio: {partner}")
-        print(f"Rating: {rating}")
-        print(f"Nivel: {nivel}")
-        print(f"Tipo: {tipo}")
+        print(f"Organización: {partner}")
+        print(f"Calificación: {rating}")
+        print(f"Skills: {skills}")
+        print(f"Dificultad: {nivel}")
+        print(f"Tipo de certificado: {tipo}")
         print(f"Inscritos: {estudiantes}")
+        
         print("---")
 
 driver.quit()
