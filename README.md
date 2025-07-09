@@ -32,7 +32,7 @@ El resultado final se guarda como `cursos_coursera.xlsx`.
 1. Clona este repositorio:
 
 ```bash
-git clone https://github.com/tu-usuario/tu-repo.git
+git clone https://github.com/uniicbog/CourseraWebScraping.git
 cd tu-repo
 ```
 
