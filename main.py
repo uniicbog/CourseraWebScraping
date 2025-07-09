@@ -27,7 +27,7 @@ prefix_url = "https://www.coursera.org"
 #Lista para almacenar los datos
 datos = []
 
-for page in range(1, 3):
+for page in range(1, 85):
     driver.get(base_url + str(page))
     time.sleep(3)  # Esperar a que se cargue la página
 
