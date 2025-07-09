@@ -5,10 +5,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
+import pandas as pd
 
 # Configurar Selenium
 options = Options()
-# options.add_argument("--headless")  # Ejecutar en segundo plano (sin abrir ventana)
+options.add_argument("--headless")  # Ejecutar en segundo plano (sin abrir ventana)
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
 
@@ -23,8 +24,10 @@ def limpiar_numero(texto):
 base_url = "https://www.coursera.org/courses?sortBy=BEST_MATCH&page="
 prefix_url = "https://www.coursera.org"
 
-for page in range(1, 3):
-    print(f"\n--- Página {page} ---")
+#Lista para almacenar los datos
+datos = []
+
+for page in range(1, 85):
     driver.get(base_url + str(page))
     time.sleep(3)  # Esperar a que se cargue la página
 
@@ -40,6 +43,16 @@ for page in range(1, 3):
 
         rating_tag = card.find('div', attrs={'aria-label': 'calificación'})
         rating = rating_tag['aria-valuenow'] if rating_tag and rating_tag.has_attr('aria-valuenow') else "Sin rating"
+
+        body_content = card.find('div', class_='cds-CommonCard-bodyContent')
+        skills = "No encontrados"
+
+        if body_content:
+            skills_tag = body_content.find('p', class_='css-vac8rf')
+            if skills_tag:
+                skills = skills_tag.get_text(strip=True)
+                if skills.lower().startswith("habilidades que obtendrás:"):
+                    skills = skills.replace("Habilidades que obtendrás:", "").strip()
 
         metadata_div = card.find('div', class_='cds-CommonCard-metadata')
         description_tag = metadata_div.find('p', class_='css-vac8rf') if metadata_div else None
@@ -72,12 +85,22 @@ for page in range(1, 3):
             except Exception as e:
                 estudiantes = f"Error: {str(e)}"
 
-        print(f"Título: {titulo}")
-        print(f"Socio: {partner}")
-        print(f"Rating: {rating}")
-        print(f"Nivel: {nivel}")
-        print(f"Tipo: {tipo}")
-        print(f"Inscritos: {estudiantes}")
-        print("---")
+        # Crear una fila por cada skill (separadas por comas)
+        lista_skills = [s.strip() for s in skills.split(',')] if skills != "No encontrados" else ["No encontrados"]
+        for skill in lista_skills:
+            datos.append({
+                "Título": titulo,
+                "Organización": partner,
+                "Calificación": rating,
+                "Skill": skill,
+                "Dificultad": nivel,
+                "Tipo de certificado": tipo,
+                "Inscritos": estudiantes
+            })
+
+# Guardar en Excel
+df = pd.DataFrame(datos)
+df.to_excel("cursos_coursera.xlsx", index=False)
+print("\n Archivo 'cursos_coursera.xlsx' creado con éxito.")
 
 driver.quit()
